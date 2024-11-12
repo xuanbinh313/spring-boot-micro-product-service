@@ -18,4 +18,9 @@ public class ProductController {
     public String getProducts() {
         return productService.getProducts();
     }
+
+    @GetMapping("/create")
+    public String createProduct() {
+        return productService.createProduct();
+    }
 }
