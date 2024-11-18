@@ -11,6 +11,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
 import com.binhcodev.product_service.clients.InventoryClient;
@@ -29,6 +31,8 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final VariationService variationService;
     private final String url = "https://cellphones.com.vn/iphone-16-pro-max.html";
+    @Autowired
+    private final MongoTemplate mongoTemplate;
 
     public String getProducts() {
         return inventoryClient.getInventories();
@@ -48,8 +52,6 @@ public class ProductService {
             String price = document.select(".tpt---price").first().text();
             String currency = price.replaceAll("[.đ]", "");
             List<Element> imageString = document.selectXpath("//div[@class=\"gallery-product-detail mb-2\"]//a");
-            // Get Variation from request
-            Set<Product> products = variationService.createVariationFromDocument(document);
 
             List<String> images = new ArrayList<>();
             for (Element el : imageString) {
@@ -64,8 +66,10 @@ public class ProductService {
                     .price(Integer.parseInt(currency))
                     .build();
             productRepository.save(productBase);
+            // Get Variation from request
+            List<Product> products = variationService.createVariationFromDocument(document);
             for (Product item : products) {
-                BeanUtils.copyProperties(productBase, item,"");
+                BeanUtils.copyProperties(productBase, item, "id", "price", "category", "variationOptions");
             }
             productRepository.saveAll(products);
 

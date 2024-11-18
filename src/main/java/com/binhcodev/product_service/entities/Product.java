@@ -41,6 +41,9 @@ public class Product {
     @DBRef
     private Category category;
 
+    @DBRef
+    private List<VariationOption> variationOptions;
+
     private int price;
 
     private List<String> images;

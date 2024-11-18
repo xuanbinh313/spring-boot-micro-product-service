@@ -1,7 +1,9 @@
 package com.binhcodev.product_service.services;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.jsoup.nodes.Document;
@@ -25,61 +27,69 @@ public class VariationService {
     private final VariationRepository variationRepository;
     private final CategoryService categoryService;
 
-    public Set<Product> createVariationFromDocument(Document document) {
-        List<Element> colors = document.selectXpath("//div[@class='box-product-variants']/div[2]/ul/li");
-        // List<Element> volumeElements = document.selectXpath("//div[@class='list-linked']//a");
-        Elements categories = document.selectXpath("//div[@id='breadcrumbs']//li//a");
+    public List<Product> createVariationFromDocument(Document document) {
+        List<Element> colors = document.selectXpath("//div[@class='box-product-variants']/div[2]/ul/li//a");
+        // List<Element> volumeElements =
+        // document.selectXpath("//div[@class='list-linked']//a");
+        List<String> categories = List.of("Điện thoại", "Apple", "IPhone 16 Series");
         // Variation volumeVariation = createVariationFromDocument("Dung lượng");
         Variation colorVariation = createVariationFromDocument("Màu Sắc");
         Category parentCategory = null;
         Category categoryProduct = null;
 
-        for (int i = 1; i < categories.size() - 1; i++) {
-            String nameCategory = categories.get(i).text();
+        for (int i = 0; i < categories.size(); i++) {
+            String nameCategory = categories.get(i);
             Category category = categoryService.findCategoryByName(nameCategory)
                     .orElseGet(() -> {
-                        Category newCategory = Category.builder().name(nameCategory).build();
-                        categoryService.save(newCategory);
+                        Category newCategory = categoryService.save(Category.builder().name(nameCategory).build());
                         return newCategory;
                     });
-            if (i == 1) {
+            if (i == 0) {
                 parentCategory = category;
             } else {
                 category.setParent(parentCategory);
                 categoryService.save(category);
-                if (i == categories.size() - 2) {
+                if (i == categories.size() - 1) {
                     categoryProduct = category;
                 }
             }
         }
 
-        Set<VariationOption> variationOptions = new HashSet<>();
-        Set<Product> products = new HashSet<>();
+        List<Product> products = new ArrayList<>();
         // for (Element volume : volumeElements) {
-        //     String variationName = volume.selectXpath("//strong").text();
-        //     String variationPrice = volume.selectXpath("//span").text().replaceAll("[.đ]", "");
-        //     VariationOption variationOption = VariationOption.builder().value(variationName).variation(volumeVariation).build();
-        //     Product product = Product
-        //             .builder()
-        //             .price(Integer.parseInt(variationPrice))
-        //             .category(categoryProduct)
-        //             .build();
-        //     products.add(product);
-        //     variationOptions.add(variationOption);
+        // String variationName = volume.selectXpath("//strong").text();
+        // String variationPrice =
+        // volume.selectXpath("//span").text().replaceAll("[.đ]", "");
+        // VariationOption variationOption =
+        // VariationOption.builder().value(variationName).variation(volumeVariation).build();
+        // Product product = Product
+        // .builder()
+        // .price(Integer.parseInt(variationPrice))
+        // .category(categoryProduct)
+        // .build();
+        // products.add(product);
+        // variationOptions.add(variationOption);
         // }
         for (Element color : colors) {
-            String variationName = color.selectXpath("//strong").text();
-            String variationPrice = color.selectXpath("//span").text().replaceAll("[.đ]", "");
-            VariationOption variationOption = VariationOption.builder().value(variationName).variation(colorVariation).build();
-            Product product = Product
+            String variationName = color.getElementsByTag("strong").text();
+            String variationPrice = color.getElementsByTag("span").text().replaceAll("[.đ₫]", "");
+            List<VariationOption> variationOptions = new ArrayList<>();
+            VariationOption variationOption = variationOptionRepository.findVariationOptionByValue(variationName)
+                    .orElseGet(() -> variationOptionRepository
+                            .save(VariationOption
+                                    .builder()
+                                    .value(variationName)
+                                    .variation(colorVariation)
+                                    .build()));
+            variationOptions.add(variationOption);
+            Product productBuilder = Product
                     .builder()
                     .price(Integer.parseInt(variationPrice))
                     .category(categoryProduct)
+                    .variationOptions(variationOptions)
                     .build();
-            products.add(product);
-            variationOptions.add(variationOption);
+            products.add(productBuilder);
         }
-        variationOptionRepository.saveAll(variationOptions);
         return products;
     }
 
