@@ -14,7 +14,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-
 @Document
 @Getter
 @Setter
@@ -35,6 +34,12 @@ public class Product {
 
     private String promoNote;
 
+    private int price;
+
+    private List<String> images;
+
+    private String url;
+    
     @DBRef
     private Product parent;
 
@@ -44,7 +49,4 @@ public class Product {
     @DBRef
     private List<VariationOption> variationOptions;
 
-    private int price;
-
-    private List<String> images;
 }

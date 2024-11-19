@@ -1,14 +1,10 @@
 package com.binhcodev.product_service.services;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
 
 import com.binhcodev.product_service.entities.Category;
@@ -25,35 +21,13 @@ import lombok.RequiredArgsConstructor;
 public class VariationService {
     private final VariationOptionRepository variationOptionRepository;
     private final VariationRepository variationRepository;
-    private final CategoryService categoryService;
 
-    public List<Product> createVariationFromDocument(Document document) {
+    public List<Product> createVariationFromDocument(Document document, Category categoryProduct) {
         List<Element> colors = document.selectXpath("//div[@class='box-product-variants']/div[2]/ul/li//a");
         // List<Element> volumeElements =
         // document.selectXpath("//div[@class='list-linked']//a");
-        List<String> categories = List.of("Điện thoại", "Apple", "IPhone 16 Series");
         // Variation volumeVariation = createVariationFromDocument("Dung lượng");
         Variation colorVariation = createVariationFromDocument("Màu Sắc");
-        Category parentCategory = null;
-        Category categoryProduct = null;
-
-        for (int i = 0; i < categories.size(); i++) {
-            String nameCategory = categories.get(i);
-            Category category = categoryService.findCategoryByName(nameCategory)
-                    .orElseGet(() -> {
-                        Category newCategory = categoryService.save(Category.builder().name(nameCategory).build());
-                        return newCategory;
-                    });
-            if (i == 0) {
-                parentCategory = category;
-            } else {
-                category.setParent(parentCategory);
-                categoryService.save(category);
-                if (i == categories.size() - 1) {
-                    categoryProduct = category;
-                }
-            }
-        }
 
         List<Product> products = new ArrayList<>();
         // for (Element volume : volumeElements) {

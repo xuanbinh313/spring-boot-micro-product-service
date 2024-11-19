@@ -1,8 +1,13 @@
 package com.binhcodev.product_service.dtos.requests;
 
-import lombok.Data;
+import java.util.List;
 
-@Data
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class ProductRequest {
     String url;
+    List<String> categories;
 }
