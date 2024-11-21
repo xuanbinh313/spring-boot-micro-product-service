@@ -1,5 +1,6 @@
 package com.binhcodev.product_service.services.impl;
 
+import java.math.BigDecimal;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
@@ -21,7 +22,7 @@ public class DMXCrawlerServiceImpl implements CrawlerService {
     }
 
     @Override
-    public Map<String, Integer> createVariationFromDocument() {
+    public Map<String, BigDecimal> createVariationFromDocument() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'createVariationFromDocument'");
     }

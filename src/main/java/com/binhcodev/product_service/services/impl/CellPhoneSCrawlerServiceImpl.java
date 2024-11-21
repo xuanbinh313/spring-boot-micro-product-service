@@ -1,6 +1,7 @@
 package com.binhcodev.product_service.services.impl;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 public class CellPhoneSCrawlerServiceImpl implements CrawlerService {
     private final InventoryClient inventoryClient;
     private Product productBase;
+    private BigDecimal basePrice;
     Document document;
 
     public String getProducts() {
@@ -47,6 +49,7 @@ public class CellPhoneSCrawlerServiceImpl implements CrawlerService {
         String promoText = containerText.children().get(1).html();
         String price = document.select(".tpt---price").first().text();
         String currency = price.replaceAll("[.đ]", "");
+        basePrice = new BigDecimal(currency);
         List<Element> imageString = document.selectXpath("//div[@class=\"gallery-product-detail mb-2\"]//a");
 
         List<String> images = new ArrayList<>();
@@ -61,12 +64,11 @@ public class CellPhoneSCrawlerServiceImpl implements CrawlerService {
                 .promoNote(promoNote)
                 .images(images)
                 .url(productRequest.getUrl())
-                .price(Integer.parseInt(currency))
                 .build();
         return name;
     }
 
-    public Map<String, Integer> createVariationFromDocument() {
+    public Map<String, BigDecimal> createVariationFromDocument() {
         List<Element> colors = document.selectXpath("//div[@class='box-product-variants']/div[2]/ul/li//a");
         // List<Element> volumeElements =
         // document.selectXpath("//div[@class='list-linked']//a");
@@ -86,22 +88,23 @@ public class CellPhoneSCrawlerServiceImpl implements CrawlerService {
         // products.add(product);
         // variationOptions.add(variationOption);
         // }
-        Map<String, Integer> colorPrices = new HashMap<>();
+        Map<String, BigDecimal> colorPrices = new HashMap<>();
 
         for (Element color : colors) {
             String variationName = color.getElementsByTag("strong").text();
             String variationPrice = color.getElementsByTag("span").text().replaceAll("[.đ₫]", "");
-            colorPrices.put(variationName, Integer.parseInt(variationPrice));
+            colorPrices.put(variationName,new BigDecimal(variationPrice));
         }
         return colorPrices;
     }
 
+    public BigDecimal getBasePrice() {
+        return basePrice;
+    }
 
     @Override
     public Product getProductBase() {
         return productBase;
     }
-
-    
 
 }

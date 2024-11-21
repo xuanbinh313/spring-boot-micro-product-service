@@ -1,5 +1,6 @@
 package com.binhcodev.product_service.services;
 
+import java.math.BigDecimal;
 import java.util.Map;
 
 import com.binhcodev.product_service.dtos.requests.ProductRequest;
@@ -11,6 +12,6 @@ public interface CrawlerService {
 
     public String createProductByUrl(ProductRequest productRequest);
 
-    public Map<String,Integer> createVariationFromDocument();
+    public Map<String,BigDecimal> createVariationFromDocument();
 
 }

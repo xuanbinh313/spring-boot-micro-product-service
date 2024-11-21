@@ -34,8 +34,6 @@ public class Product {
 
     private String promoNote;
 
-    private int price;
-
     private List<String> images;
 
     private String url;
