@@ -1,5 +1,7 @@
 package com.binhcodev.product_service.controllers;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,8 +25,9 @@ public class ProductController {
     private final ProductService productService;
 
     @GetMapping
-    public String getProducts() {
-        return productService.getProducts();
+    public ResponseEntity<List<ProductResponse>> getProducts() {
+        List<ProductResponse> products = productService.getProducts();
+        return ResponseEntity.ok(products);
     }
 
     @GetMapping("/{id}")

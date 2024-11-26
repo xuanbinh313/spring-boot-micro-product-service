@@ -12,4 +12,6 @@ public interface ProductRepository extends MongoRepository<Product, ObjectId> {
     Set<Product> findByParent(ObjectId parentId);
 
     List<Product> findAllByName(String name);
+
+    List<Product> findAllByIdIn(List<String> ids);
 }

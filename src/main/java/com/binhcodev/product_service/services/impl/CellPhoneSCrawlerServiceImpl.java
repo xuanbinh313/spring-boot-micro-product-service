@@ -12,7 +12,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.springframework.stereotype.Service;
 
-import com.binhcodev.product_service.clients.InventoryClient;
 import com.binhcodev.product_service.dtos.requests.ProductRequest;
 import com.binhcodev.product_service.entities.Product;
 import com.binhcodev.product_service.services.CrawlerService;
@@ -22,14 +21,9 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class CellPhoneSCrawlerServiceImpl implements CrawlerService {
-    private final InventoryClient inventoryClient;
     private Product productBase;
     private BigDecimal basePrice;
     Document document;
-
-    public String getProducts() {
-        return inventoryClient.getInventories();
-    }
 
     @Override
     public String createProductByUrl(ProductRequest productRequest) {
