@@ -5,12 +5,8 @@ import java.util.Locale.Category;
 
 import org.bson.types.ObjectId;
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 
 import com.binhcodev.product_service.entities.Product;
-import com.binhcodev.product_service.entities.ProductItem;
-import com.binhcodev.product_service.entities.VariationOption;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -24,7 +20,7 @@ public class ProductResponse {
 
     }
 
-    private ProductItem productItem;
+    private List<VariationOptionResponse> children;
 
     private ObjectId id;
 
@@ -41,6 +37,4 @@ public class ProductResponse {
     private Product parent;
 
     private Category category;
-
-    private List<VariationOption> variationOptions;
 }

@@ -6,15 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.naming.NameNotFoundException;
 
 import org.bson.types.ObjectId;
-import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.binhcodev.product_service.clients.InventoryClient;
@@ -22,6 +16,7 @@ import com.binhcodev.product_service.dtos.requests.ProductItemRequest;
 import com.binhcodev.product_service.dtos.requests.ProductRequest;
 import com.binhcodev.product_service.dtos.responses.ProductItemResponse;
 import com.binhcodev.product_service.dtos.responses.ProductResponse;
+import com.binhcodev.product_service.dtos.responses.VariationOptionResponse;
 import com.binhcodev.product_service.entities.Category;
 import com.binhcodev.product_service.entities.Product;
 import com.binhcodev.product_service.entities.Variation;
@@ -82,20 +77,33 @@ public class ProductServiceIpml implements ProductService {
     @Override
     public List<ProductResponse> getProducts() {
         List<Product> products = productRepository.findAll();
-        List<ProductItemResponse> productItems = inventoryClient.getProductsItems().getBody();
+        List<ProductItemResponse> productItems = Optional.ofNullable(inventoryClient.getProductsItems().getBody())
+                .orElse(new ArrayList<>());
+        List<VariationOptionResponse> variationOptionResponses = new ArrayList<>();
+        for (ProductItemResponse productItemResponse : productItems) {
+            List<ObjectId> ids = productItemResponse
+                    .getVariationOptions()
+                    .stream()
+                    .map(ObjectId::new)
+                    .toList();
+            List<VariationOption> variationOptions = variationOptionRepository.findAllById(ids);
+            VariationOptionResponse variationOptionResponse = VariationOptionResponse.builder()
+                    .productItem(productItemResponse.getProductItem())
+                    .variationOptions(variationOptions).build();
+            variationOptionResponses.add(variationOptionResponse);
+        }
+
         List<ProductResponse> productResponses = new ArrayList<>();
         for (Product product : products) {
-            Optional<ProductItemResponse> productItemsFilter = productItems.stream()
-                    .filter(item -> item.getProductItem().getProductId().equals(product.getId().toString()))
-                    .findFirst();
-            if (productItemsFilter.isPresent()) {
+            List<VariationOptionResponse> productItemsFilter = variationOptionResponses.stream()
+                    .filter(item -> item
+                            .getProductItem()
+                            .getProductId()
+                            .equals(product.getId().toString()))
+                    .toList();
+            if (!productItemsFilter.isEmpty()) {
                 ProductResponse productResponse = new ProductResponse(product);
-                productResponse.setProductItem(productItemsFilter.get().getProductItem());
-                List<ObjectId> variationOptionIds = productItemsFilter.get().getVariationOptions().stream()
-                        .map(ObjectId::new)
-                        .toList();
-                List<VariationOption> variationOptions = variationOptionRepository.findAllById(variationOptionIds);
-                productResponse.setVariationOptions(variationOptions);
+                productResponse.setChildren(productItemsFilter);
                 productResponses.add(productResponse);
             }
         }
